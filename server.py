@@ -60,5 +60,5 @@ async def get_articles() -> list[Article]:
 
 
 if __name__ == "__main__":
-    # Run server with streamable-http transport for easy testing
-    mcp.run(transport="streamable-http")
+    # Run server with stdio transport
+    mcp.run(transport="stdio")
