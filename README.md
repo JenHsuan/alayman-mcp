@@ -105,6 +105,18 @@ Alternatively, you can manually add it to your Claude Code MCP configuration:
 
 After updating the configuration, restart Claude Code or reload the MCP servers for the changes to take effect.
 
+### Integration with Docker and Claude Code
+
+* Build the Docker image
+```
+docker build -t alayman .
+```
+
+* Add the Docker container as the MCP server
+```
+claude mcp add-json --scope user alayman '{"type":"stdio","command":"docker","args":["run","-i","--rm","--init","-e","DOCKER_CONTAINER=true","alayman"]}'
+```
+
 ## Available Tools
 
 ### get_articles
