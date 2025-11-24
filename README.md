@@ -76,6 +76,35 @@ To use this server with Claude Desktop, add it to your Claude Desktop configurat
 
 Restart Claude Desktop after updating the configuration.
 
+### Integration with Claude Code
+
+You can add this server to Claude Code using the `claude mcp add` command. From the project directory, run:
+
+```bash
+claude mcp add --scope user alayman uv run $(pwd)/server.py
+```
+
+This will add the server with the name "alayman" to your user-level MCP configuration, making it available across all your Claude Code sessions.
+
+Alternatively, you can manually add it to your Claude Code MCP configuration:
+
+- **macOS/Linux**: `~/.claude/mcp.json`
+- **Windows**: `%USERPROFILE%\.claude\mcp.json`
+
+```json
+{
+  "mcpServers": {
+    "shellserver": {
+      "command": "uv",
+      "args": ["run", "/absolute/path/to/server.py"],
+      "cwd": "/absolute/path/to/shellserver"
+    }
+  }
+}
+```
+
+After updating the configuration, restart Claude Code or reload the MCP servers for the changes to take effect.
+
 ## Available Tools
 
 ### get_articles
