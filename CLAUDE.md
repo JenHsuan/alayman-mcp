@@ -46,3 +46,8 @@ MCP servers typically define:
 ## Project Structure
 
 This is a minimal single-file MCP server project. The main implementation goes in `server.py`.
+
+
+## Rules
+Always follows rules from the following files.
+* rules/python.md
