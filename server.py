@@ -1,5 +1,6 @@
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated
 import httpx
 import os
 from dotenv import load_dotenv
@@ -29,13 +30,29 @@ class Article(BaseModel):
     checkCount: int = Field(description="Number of views/checks")
 
 
+class ArticlesResponse(BaseModel):
+    """Response model for paginated articles"""
+    articles: list[Article]
+    total: int
+    offset: int
+    limit: int
+    has_more: bool
+
+
 @mcp.tool()
-async def get_articles() -> list[Article]:
+async def get_articles(
+    limit: Annotated[int, Field(description="Number of articles to return", ge=1, le=100)] = 20,
+    offset: Annotated[int, Field(description="Number of articles to skip", ge=0)] = 0
+) -> ArticlesResponse:
     """
-    Retrieve a list of blog articles from the API.
+    Retrieve a paginated list of blog articles from the API.
+
+    Args:
+        limit: Number of articles to return (default: 20, max: 100)
+        offset: Number of articles to skip (default: 0)
 
     Returns:
-        A list of articles with metadata including title, author, URL, and engagement metrics.
+        A paginated response containing articles, total count, pagination info, and has_more flag.
     """
     api_url = os.getenv("ALAYMAN_API_URL")
     if not api_url:
@@ -47,9 +64,21 @@ async def get_articles() -> list[Article]:
             response.raise_for_status()
             articles_data = response.json()
 
-            # Parse and validate articles using Pydantic
-            articles = [Article(**article) for article in articles_data]
-            return articles
+            # Parse and validate all articles using Pydantic
+            all_articles = [Article(**article) for article in articles_data]
+            total = len(all_articles)
+
+            # Apply pagination
+            paginated_articles = all_articles[offset:offset + limit]
+            has_more = (offset + limit) < total
+
+            return ArticlesResponse(
+                articles=paginated_articles,
+                total=total,
+                offset=offset,
+                limit=limit,
+                has_more=has_more
+            )
 
         except httpx.HTTPStatusError as e:
             raise Exception(f"HTTP error occurred: {e.response.status_code} - {e.response.text}")
