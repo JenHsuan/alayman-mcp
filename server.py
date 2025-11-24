@@ -1,6 +1,11 @@
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, ConfigDict, Field
 import httpx
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Create FastMCP server
 mcp = FastMCP("shellserver")
@@ -32,7 +37,9 @@ async def get_articles() -> list[Article]:
     Returns:
         A list of articles with metadata including title, author, URL, and engagement metrics.
     """
-    api_url = "https://alayman.io/api/articles"
+    api_url = os.getenv("ALAYMAN_API_URL")
+    if not api_url:
+        raise Exception("ALAYMAN_API_URL environment variable is not set")
 
     async with httpx.AsyncClient() as client:
         try:
