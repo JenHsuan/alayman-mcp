@@ -39,6 +39,35 @@ class ArticlesResponse(BaseModel):
     has_more: bool
 
 
+@mcp.prompt()
+def list_articles(
+    number: Annotated[int, Field(description="Number of articles to list")] = 10,
+    condition: Annotated[str, Field(description="Condition or filter for articles")] = ""
+) -> str:
+    """
+    Generate a prompt to list alayman's articles with optional conditions.
+
+    Args:
+        number: Number of articles to list (default: 10)
+        condition: Optional condition or filter criteria (user-defined)
+
+    Returns:
+        A prompt string instructing the LLM to fetch and display articles.
+    """
+    prompt_text = f"List {number} alayman's articles"
+    if condition:
+        prompt_text += f" {condition}"
+
+    prompt_text += f"\n\nPlease use the get_articles tool to fetch the articles. Set the limit parameter to {number}."
+
+    if condition:
+        prompt_text += f"\n\nApply the following condition when presenting the results: {condition}"
+
+    prompt_text += "\n\nDisplay the results in a clear, readable format including the article title, author, publication time, and URL."
+
+    return prompt_text
+
+
 @mcp.tool()
 async def get_articles(
     limit: Annotated[int, Field(description="Number of articles to return", ge=1, le=100)] = 20,

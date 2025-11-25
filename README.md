@@ -1,17 +1,37 @@
-# Shellserver - MCP Article Retrieval Server
+# Alayman MCP Server - Article Retrieval and Search
 
-A simple Model Context Protocol (MCP) server that exposes a tool to retrieve blog articles from an external API.
+A Model Context Protocol (MCP) server that provides tools and prompts to retrieve and search blog articles from the **Alayman blog** ([A Layman on Medium](https://medium.com/a-layman)) by Jen-Hsuan Hsieh (Sean).
 
 ## Overview
 
-This MCP server provides a single tool called `get_articles` that fetches and returns a list of blog articles with metadata including titles, authors, URLs, and engagement metrics.
+This MCP server provides tools and prompts to interact with Alayman blog articles, allowing you to:
+- Fetch paginated article lists (currently 285+ articles available)
+- Search and filter articles by topic, title, or content
+- Generate contextual prompts for article discovery
+- Access article metadata including author, publication time, read time, and engagement metrics
 
 ## Features
 
-- **Article Retrieval Tool**: Fetches articles
+- **Article Retrieval Tool**: Fetches paginated articles with customizable limit and offset
+- **Article List Prompt**: Generates intelligent prompts for article discovery with optional filters
 - **Structured Output**: Returns validated data using Pydantic models
+- **Pagination Support**: Efficient handling of large article collections
 - **Async HTTP**: Uses httpx for efficient async API calls
-- **Error Handling**: Proper exception handling for network and HTTP errors
+- **Error Handling**: Comprehensive exception handling for network and HTTP errors
+
+## Topics Covered in the Blog
+
+The Alayman blog covers a wide range of software engineering topics, including:
+
+- **Frontend Development**: React, Angular, Next.js, Vue.js, TypeScript, JavaScript
+- **Backend Development**: Django, Node.js, NestJS, Python, GraphQL, RESTful APIs
+- **Data Visualization**: D3.js, Cytoscape.js, Highcharts, ECharts
+- **Cloud & DevOps**: AWS, Docker, Kubernetes, CI/CD, GitLab, GitHub Actions
+- **Architecture & Patterns**: Micro Frontends, Design Patterns, System Design
+- **Testing**: Unit Testing, Integration Testing, Karma, Jasmine
+- **AI & Tools**: Claude CLI, GitHub Copilot, RAG, LangChain.js
+- **Web Performance**: SEO, Optimization, Caching, SSR/SSG
+- **Career & Soft Skills**: Team Management, Digital Nomad Life, Conference Insights
 
 ## Requirements
 
@@ -117,16 +137,49 @@ docker build -t alayman .
 claude mcp add-json --scope user alayman '{"type":"stdio","command":"docker","args":["run","-i","--rm","--init","-e","DOCKER_CONTAINER=true","alayman"]}'
 ```
 
-## Available Tools
+## Quick Start Examples
 
-### get_articles
+Once integrated with Claude Desktop or Claude Code, you can use the server in various ways:
 
-Retrieves a list of blog articles from the API.
+**Direct tool usage:**
+```
+Show me the first 10 articles from the Alayman blog
+Get articles 20-30 from the blog
+Retrieve 5 articles starting from position 10
+```
 
-**Parameters**: None
+**Using the prompt command (Claude Code):**
+```bash
+/alayman:list_articles 10 "the title contains 'React'"
+/alayman:list_articles 5 "articles about Django"
+/alayman:list_articles 15 "published in the last year"
+```
 
-**Returns**: A list of Article objects with the following fields:
+**Natural language queries:**
+```
+Find all articles about Angular
+Show me articles related to AWS
+List articles about data visualization with D3.js
+```
 
+## Available Tools and Prompts
+
+### Tool: get_articles
+
+Retrieves a paginated list of blog articles from the API.
+
+**Parameters**:
+- `limit` (int, optional): Number of articles to return (default: 20, min: 1, max: 100)
+- `offset` (int, optional): Number of articles to skip (default: 0, min: 0)
+
+**Returns**: An ArticlesResponse object containing:
+- `articles` (list[Article]): List of article objects
+- `total` (int): Total number of articles available
+- `offset` (int): Current offset value
+- `limit` (int): Current limit value
+- `has_more` (bool): Whether more articles are available
+
+**Article Object Fields**:
 - `id` (int): Unique article identifier
 - `title` (str): Article title
 - `subtitle` (str): Article subtitle
@@ -143,18 +196,48 @@ Retrieves a list of blog articles from the API.
 **Example usage in Claude**:
 
 ```
-Can you retrieve the latest articles using the get_articles tool?
+Can you retrieve the first 10 articles?
+Can you get articles 20-40?
+Fetch the latest 5 articles from the blog.
 ```
+
+### Prompt: list_articles
+
+Generates an intelligent prompt to list and filter Alayman's articles. This prompt will instruct the LLM to use the get_articles tool and apply specific filters.
+
+**Parameters**:
+- `number` (int, optional): Number of articles to list (default: 10)
+- `condition` (str, optional): Condition or filter criteria for articles (default: "")
+
+**Example usage in Claude Code**:
+
+```
+/alayman:list_articles 5 "the title contains 'React'"
+/alayman:list_articles 10 "published in 2024"
+/alayman:list_articles 15 "related to Python"
+```
+
+When you run this prompt, it generates instructions for Claude to fetch articles and apply your specified conditions when presenting the results.
 
 ## Project Structure
 
 ```
-shellserver/
-   server.py           # Main MCP server implementation
-   pyproject.toml      # Project dependencies
-   README.md           # This file
-   CLAUDE.md           # Claude Code project instructions
-   .python-version     # Python version specification
+alayman-mcp/
+├── server.py           # Main MCP server implementation
+├── pyproject.toml      # Project dependencies and metadata
+├── uv.lock             # Dependency lock file
+├── README.md           # This file
+├── CLAUDE.md           # Claude Code project instructions
+├── reference.md        # Additional reference documentation
+├── Dockerfile          # Docker container configuration
+├── .dockerignore       # Docker build exclusions
+├── .env.example        # Example environment variables
+├── .env                # Environment variables (not in git)
+├── .python-version     # Python version specification (3.11)
+├── .gitignore          # Git exclusions
+├── .venv/              # Virtual environment (created by uv)
+└── rules/              # Development rules and guidelines
+    └── python.md       # Python coding standards
 ```
 
 ## Dependencies
@@ -169,16 +252,19 @@ shellserver/
 
 The server uses the FastMCP framework from the MCP Python SDK, which provides:
 
-- Simple decorator-based tool registration
+- Simple decorator-based tool and prompt registration
 - Automatic JSON schema generation from type hints
 - Built-in validation using Pydantic models
 - Support for async operations
 
 ### Code Structure
 
-1. **Pydantic Model**: Defines the `Article` schema for type-safe data validation
-2. **Tool Function**: The `get_articles()` async function fetches and validates article data
-3. **Server Instance**: FastMCP server configured with streamable-http transport
+1. **Pydantic Models**:
+   - `Article`: Defines the article schema for type-safe data validation
+   - `ArticlesResponse`: Defines the paginated response structure
+2. **Tool Function**: The `get_articles()` async function fetches and validates article data with pagination support
+3. **Prompt Function**: The `list_articles()` function generates contextual prompts for article discovery
+4. **Server Instance**: FastMCP server configured with stdio transport
 
 ## Error Handling
 
