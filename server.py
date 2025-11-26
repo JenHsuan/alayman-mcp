@@ -118,5 +118,5 @@ async def get_articles(
 
 
 if __name__ == "__main__":
-    # Run server with stdio transport
-    mcp.run(transport="stdio")
+    # Run server with SSE transport over HTTP
+    mcp.run(transport="sse")

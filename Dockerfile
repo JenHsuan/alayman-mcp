@@ -46,5 +46,8 @@ RUN --mount=type=bind,source=.,target=/tmp/context \
 # Set environment variables
 ENV PATH="/app/.venv/bin:$PATH"
 
+# Expose the SSE server port (default for FastMCP SSE transport)
+EXPOSE 8000
+
 # Run the server
 CMD ["uv", "run", "server.py"]
