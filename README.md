@@ -73,9 +73,9 @@ Start the MCP server with SSE transport over HTTP:
 uv run server.py
 ```
 
-By default, the server will start on `http://localhost:8000` with the SSE endpoint available at:
-- SSE endpoint: `http://localhost:8000/sse`
-- Messages endpoint: `http://localhost:8000/messages`
+By default, the server will start on `http://127.0.0.1:8000` with the SSE endpoint available at:
+- SSE endpoint: `http://127.0.0.1:8000/sse`
+- Messages endpoint: `http://127.0.0.1:8000/messages`
 
 You can specify a custom port using the `PORT` environment variable:
 
@@ -102,7 +102,7 @@ uv run server.py
 
 2. In a separate terminal, start the MCP Inspector and connect to the SSE endpoint:
 ```bash
-npx @modelcontextprotocol/inspector http://localhost:8000/sse
+npx @modelcontextprotocol/inspector http://127.0.0.1:8000/sse
 ```
 
 The inspector will connect to your running SSE server and allow you to test tools and prompts interactively.
@@ -153,7 +153,7 @@ uv run server.py
 Then add the SSE server to Claude Code using the `claude mcp add` command:
 
 ```bash
-claude mcp add --scope user --transport sse alayman http://localhost:8000/sse
+claude mcp add --scope user --transport sse alayman http://127.0.0.1:8000/sse
 ```
 
 This will add the SSE server with the name "alayman" to your user-level MCP configuration.
@@ -167,7 +167,7 @@ Alternatively, you can manually add it to your Claude Code MCP configuration:
 {
   "mcpServers": {
     "alayman": {
-      "url": "http://localhost:8000/sse"
+      "url": "http://127.0.0.1:8000/sse"
     }
   }
 }
@@ -233,7 +233,7 @@ docker run -d -p 8000:8000 \
 Then add the SSE endpoint to Claude Code:
 
 ```bash
-claude mcp add --scope user --transport sse alayman http://localhost:8000/sse
+claude mcp add --scope user --transport sse alayman http://127.0.0.1:8000/sse
 ```
 
 Or manually configure:
@@ -242,7 +242,7 @@ Or manually configure:
 {
   "mcpServers": {
     "alayman": {
-      "url": "http://localhost:8000/sse"
+      "url": "http://127.0.0.1:8000/sse"
     }
   }
 }
@@ -275,9 +275,9 @@ When running the server with SSE transport, you can connect to it from any MCP c
 
 #### Connection Details
 
-- **Base URL**: `http://localhost:8000`
-- **SSE Endpoint**: `http://localhost:8000/sse`
-- **Messages Endpoint**: `http://localhost:8000/messages`
+- **Base URL**: `http://127.0.0.1:8000`
+- **SSE Endpoint**: `http://127.0.0.1:8000/sse`
+- **Messages Endpoint**: `http://127.0.0.1:8000/messages`
 - **Transport Type**: `sse`
 
 #### Example: Connecting with MCP Client SDK
@@ -289,7 +289,7 @@ If you're building a custom MCP client using the MCP SDK, you can connect to the
 from mcp.client import Client
 from mcp.client.sse import sse_client
 
-async with sse_client("http://localhost:8000/sse") as (read, write):
+async with sse_client("http://127.0.0.1:8000/sse") as (read, write):
     async with Client(read, write) as client:
         # Use the client to call tools
         result = await client.call_tool("get_articles", {"limit": 10})
@@ -302,7 +302,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 
 const transport = new SSEClientTransport(
-  new URL("http://localhost:8000/sse")
+  new URL("http://127.0.0.1:8000/sse")
 );
 const client = new Client({
   name: "example-client",
@@ -365,7 +365,7 @@ docker run -d \
 **Behind a reverse proxy (nginx):**
 ```nginx
 location /mcp/alayman/ {
-    proxy_pass http://localhost:8000/;
+    proxy_pass http://127.0.0.1:8000/;
     proxy_http_version 1.1;
     proxy_set_header Connection "";
     proxy_set_header Host $host;
