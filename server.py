@@ -119,4 +119,12 @@ async def get_articles(
 
 if __name__ == "__main__":
     # Run server with SSE transport over HTTP
-    mcp.run(transport="sse")
+    # Port is retrieved from .env file, defaults to 8000
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))
+
+    # Get the SSE app from FastMCP
+    app = mcp.sse_app()
+
+    # Run with uvicorn on specified port
+    uvicorn.run(app, host="127.0.0.1", port=port)
